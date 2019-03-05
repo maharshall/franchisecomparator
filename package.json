@@ -1,0 +1,14 @@
+{
+  "name": "franchisecomparator",
+  "version": "1.0.0",
+  "description": "compare the actors from two franchises on imdb",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "imdb-scrapper": "^2.2.0"
+  }
+}
