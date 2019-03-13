@@ -1,60 +1,132 @@
-const imdb = require('imdb-scrapper');
+// Alexander Marshall
+// This product uses the TMDb API but is not endorsed or certified by TMDb
 
-let search1 = imdb.simpleSearch(process.argv[2]);
-let search2 = imdb.simpleSearch(process.argv[3]);
+const key = 'redacted';
 
-Promise.all([search1, search2]).then((result) => {
-    var franchises = [result[0].d, result[1].d];
+$('#f1, #f2').keypress((e) => {
+    if(e.which == 13) {
+        $('#go').click();
+    }
+})
 
-    var promises = [[], []];
-    var entries = [[], []];
+$('#go').click(function search() {
+    var query1 = $('#f1').val();
+    var query2 = $('#f2').val();
 
-    for(i in franchises) {
-        for(j in franchises[i]) {
-            promises[i].push(fetchCastData(franchises[i][j].id));
-            entries[i].push(franchises[i][j].l);
+    getCollectionIDs(query1, query2);
+})
+
+function getCollectionIDs(query1, query2) {
+    $.ajax({
+        url: 'https://api.themoviedb.org/3/search/collection',
+        data: {
+            api_key: key,
+            query: query1+' collection'
+        },
+        success: function(xhr) {
+            var id1 = xhr.results[0].id;
+
+            $.ajax({
+                url: 'https://api.themoviedb.org/3/search/collection',
+                data: {
+                    api_key: key,
+                    query: query2+' collection'
+                },
+                success: function(xhr) {
+                    var id2 = xhr.results[0].id;
+                    getMovieIDs(id1, id2);
+                }
+            })
         }
+    })
+}
+
+function getMovieIDs(collection1, collection2) {
+    var c1_ids = [],
+        c2_ids = [];
+    $.ajax({
+        url: 'https://api.themoviedb.org/3/collection/'+collection1,
+        data: {
+            api_key: key,
+        },
+        success: function(xhr) {
+            for(i in xhr.parts) {
+                c1_ids.push({
+                    title: xhr.parts[i].title,
+                    id: xhr.parts[i].id
+                });
+            }
+
+            $.ajax({
+                url: 'https://api.themoviedb.org/3/collection/'+collection2,
+                data: {
+                    api_key: key,
+                },
+                success: function(xhr) {
+                    for(i in xhr.parts) {
+                        c2_ids.push({
+                            title: xhr.parts[i].title,
+                            id: xhr.parts[i].id
+                        });
+                    }
+                    
+                    getCast(c1_ids, c2_ids);
+                }
+            })
+        }
+    })
+}
+
+function getCast(c1_ids, c2_ids) {
+    var entries = [[], []],
+        promises = [[], []];
+
+    for(let i = 1; i < c1_ids.length; i++) {
+        promises[0].push(getCastAjax(c1_ids[i].id));
+        entries[0].push(c1_ids[i].title);
+    }
+
+    for(let i = 1; i < c2_ids.length; i++) {
+        promises[1].push(getCastAjax(c2_ids[i].id));
+        entries[1].push(c2_ids[i].title);
     }
 
     Promise.all(promises.map(Promise.all.bind(Promise))).then(result => {
-        getActors(result, entries);
-    })
-});
-
-function getActors(cast, entries) {
-    var actors = [[], []];
-    
-    for(i in cast) {
-        for(j in cast[i]) {
-
-            var temp = [];
-            for(k in cast[i][j].cast) {
-                if(actors[i].indexOf(cast[i][j].cast[k]) === -1) {
-                    temp.push(cast[i][j].cast[k]);
-                }
-            }
-
-            actors[i].push({
-                title: entries[i][j],
-                cast: temp
-            });
-        }
-    }
-
-    compareActors(actors);
+        compareCasts(entries, result);
+    })    
 }
 
-function compareActors(actors) {
+function getCastAjax(id) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: 'https://api.themoviedb.org/3/movie/'+id+'/credits',
+            data: {
+                api_key: key
+            },
+            success: function(xhr) {
+                var temp = [];
+            
+                for(j in xhr.cast) {
+                    temp.push({name: xhr.cast[j].name, role: xhr.cast[j].character});
+                }
+
+                resolve(temp);
+            }
+        })
+    })
+}
+
+function compareCasts(entries, actors) {
     var commonActors = new Map();
 
     for(i in actors[0]) {
         for(j in actors[1]) {
-            for(k in actors[0][i].cast) {
-                for(l in actors[1][j].cast) {
-                    if(actors[0][i].cast[k].name === actors[1][j].cast[l].name) {
-                        var name = actors[0][i].cast[k].name,
-                            role1 = {title: actors[0][i].title, role: actors[0][i].cast[k].role},
-                            role2 = {title: actors[1][j].title, role: actors[1][j].cast[l].role};
+            for(k in actors[0][i]) {
+                for(l in actors[1][j]) {
+                    if(actors[0][i][k].name === actors[1][j][l].name) {
+                        var name = actors[0][i][k].name,
+                            role1 = {title: entries[0][i], role: actors[0][i][k].role},
+                            role2 = {title: entries[1][j], role: actors[1][j][l].role};
                                                 
                         if(commonActors.has(name)) {
                             if(!commonActors.get(name).some(({title}) => title == role1.title)) {
@@ -78,21 +150,17 @@ function compareActors(actors) {
     } else {
         printCommonActors(commonActors);
     }
-    process.exit(-1);
 }
 
 function printCommonActors(actors) {
+    var txt = '';
     actors.forEach((value, key) => {
-        console.log(`${key}:`);
+        txt = txt.concat(`${key}:<br>`);
         value.forEach((entry) => {
-            console.log(`  ${entry.role} -> ${entry.title}`);
+            txt = txt.concat(`-${entry.role} in ${entry.title}<br>`);
         });
-        console.log('');
+        txt = txt.concat('<hr>');
     });
-}
 
-function fetchCastData(id) {
-    return new Promise(function (resolve, reject) {
-        resolve(imdb.getCast(id));
-    });
-};
+    $('#results').html(txt);
+}
