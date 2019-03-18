@@ -1,0 +1,94 @@
+body {
+    background-color: #272838;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+    color: #989FCE;
+}
+
+#header {
+    text-align: center;
+}
+
+#go {
+    display: none;
+}
+
+h3 {
+    text-align: center;
+    color: #989FCE;
+}
+
+#f1, #f2 {
+    background-color: #292b3d;
+    color: #989FCE;
+    display: inline-block;
+    border: none;
+    border-bottom: 2px solid #347FC4;
+    height: 30px;
+    width: 300px;
+    text-align: center;
+    font-size: 19px;
+}
+
+#results {
+    color: #989FCE;
+}
+
+hr {
+    border-color: #347FC4;
+    width: 50%;
+    opacity: 0.7;
+}
+
+#results {
+    text-align: center;
+}
+
+.name, .role {
+    position: relative;
+    padding: 0;
+    margin: auto;
+    line-height: 5px;
+    left: -50px;
+}
+
+.name {
+    font-size: 22px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+.role {
+    font-size: 16px;
+}
+
+.img {
+    width: 100px;
+    height: 150px;
+    display: inline-block;
+    float: left;
+}
+
+.prof {
+    float: left;
+    width: 100px;
+    min-height: 150px;
+}
+
+.actor {
+    width: 50%;
+    min-height: 150px;
+    margin: auto;
+    display: inline-block;
+}
+
+#bottom {
+    bottom: 0;
+    position: fixed;
+    margin-left: auto;
+    margin-right: auto;
+    left: 37%;
+    right: 37%;
+}

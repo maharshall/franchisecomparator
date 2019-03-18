@@ -1,7 +1,7 @@
 // Alexander Marshall
 // This product uses the TMDb API but is not endorsed or certified by TMDb
 
-const key = 'redacted';
+const key = '21877a036744cc8b7672730e01a931dc';
 
 $('#f1, #f2').keypress((e) => {
     if(e.which == 13) {
@@ -25,6 +25,7 @@ function getCollectionIDs(query1, query2) {
         },
         success: function(xhr) {
             var id1 = xhr.results[0].id;
+            var name1 = xhr.results[0].name;
 
             $.ajax({
                 url: 'https://api.themoviedb.org/3/search/collection',
@@ -34,7 +35,9 @@ function getCollectionIDs(query1, query2) {
                 },
                 success: function(xhr) {
                     var id2 = xhr.results[0].id;
+                    var name2 = xhr.results[0].name;
                     getMovieIDs(id1, id2);
+                    $('h3').html(`Comparing '${name1}' against '${name2}'`);
                 }
             })
         }
@@ -107,7 +110,11 @@ function getCastAjax(id) {
                 var temp = [];
             
                 for(j in xhr.cast) {
-                    temp.push({name: xhr.cast[j].name, role: xhr.cast[j].character});
+                    temp.push({
+                        name: xhr.cast[j].name, 
+                        role: xhr.cast[j].character, 
+                        img: xhr.cast[j].profile_path
+                    });
                 }
 
                 resolve(temp);
@@ -125,6 +132,7 @@ function compareCasts(entries, actors) {
                 for(l in actors[1][j]) {
                     if(actors[0][i][k].name === actors[1][j][l].name) {
                         var name = actors[0][i][k].name,
+                            img = actors[0][i][k].img,
                             role1 = {title: entries[0][i], role: actors[0][i][k].role},
                             role2 = {title: entries[1][j], role: actors[1][j][l].role};
                                                 
@@ -137,7 +145,7 @@ function compareCasts(entries, actors) {
                                 commonActors.get(name).push(role2);
                             }
                         } else {
-                            commonActors.set(name, [role1, role2]);
+                            commonActors.set(name, [img, role1, role2]);
                         }
                     }
                 }
@@ -155,11 +163,16 @@ function compareCasts(entries, actors) {
 function printCommonActors(actors) {
     var txt = '';
     actors.forEach((value, key) => {
-        txt = txt.concat(`${key}:<br>`);
-        value.forEach((entry) => {
-            txt = txt.concat(`-${entry.role} in ${entry.title}<br>`);
-        });
-        txt = txt.concat('<hr>');
+        txt = txt.concat(`<div class="actor"> <div class="img">`);
+        
+        if(value[0]) {
+            txt = txt.concat(`<img class="prof" src="https://image.tmdb.org/t/p/original${value[0]}">`);
+        }
+        txt = txt.concat(`</div> <p class="name">${key}</p><br>`);
+        for(var i = 1; i < value.length; i++) {
+            txt = txt.concat(`<p class="role">${value[i].role} in ${value[i].title}</p><br>`);
+        };
+        txt = txt.concat('</div><hr>');
     });
 
     $('#results').html(txt);
