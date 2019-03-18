@@ -10,11 +10,15 @@
     <body>
         <div id="header">
             <h1>Franchise Comparator</h1>
-            <input type="text" id="f1"> <input type="text" id="f2"> 
+            <input type="text" id="f1" autofocus="true" placeholder="first franchise"> 
+            <input type="text" id="f2" placeholder="second franchise"> 
             <button id="go">Go</button>
         </div>
         
-        <h3></h3>
+        <h3 hidden="true">
+            Comparing <select id="s1"> </select> against <select id="s2"> </select>
+        </h3>
+        
         <hr>
         <div id="results">
 

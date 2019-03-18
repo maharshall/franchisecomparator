@@ -32,6 +32,18 @@ h3 {
     font-size: 19px;
 }
 
+#s1, #s2 {
+    background-color: #292b3d;
+    color: #989FCE;
+    display: inline-block;
+    border: none;
+    border-bottom: 2px solid #347FC4;
+    height: 30px;
+    width: 300px;
+    text-align: center;
+    font-size: 15px;
+}
+
 #results {
     color: #989FCE;
 }
@@ -75,6 +87,7 @@ hr {
     float: left;
     width: 100px;
     min-height: 150px;
+    object-fit: contain;
 }
 
 .actor {

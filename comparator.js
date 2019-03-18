@@ -13,6 +13,7 @@ $('#go').click(function search() {
     var query1 = $('#f1').val();
     var query2 = $('#f2').val();
 
+    $('#s1, #s2').find('option').remove();
     getCollectionIDs(query1, query2);
 })
 
@@ -25,7 +26,10 @@ function getCollectionIDs(query1, query2) {
         },
         success: function(xhr) {
             var id1 = xhr.results[0].id;
-            var name1 = xhr.results[0].name;
+            
+            for(i in xhr.results) {
+                $('#s1').append(`<option value="${xhr.results[i].id}">${xhr.results[i].name}</option>`);
+            }
 
             $.ajax({
                 url: 'https://api.themoviedb.org/3/search/collection',
@@ -35,9 +39,12 @@ function getCollectionIDs(query1, query2) {
                 },
                 success: function(xhr) {
                     var id2 = xhr.results[0].id;
-                    var name2 = xhr.results[0].name;
+
+                    for(j in xhr.results) {
+                        $('#s2').append(`<option value="${xhr.results[j].id}">${xhr.results[j].name}</option>`);
+                    }
                     getMovieIDs(id1, id2);
-                    $('h3').html(`Comparing '${name1}' against '${name2}'`);
+                    $('h3').show();
                 }
             })
         }
@@ -177,3 +184,7 @@ function printCommonActors(actors) {
 
     $('#results').html(txt);
 }
+
+$('#s1, #s2').change(() => {
+    getMovieIDs($('#s1').val(), $('#s2').val());
+})
