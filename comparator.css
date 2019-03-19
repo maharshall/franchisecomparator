@@ -46,6 +46,7 @@ h3 {
 
 #results {
     color: #989FCE;
+    padding-bottom: 10px;
 }
 
 hr {
@@ -100,8 +101,9 @@ hr {
 #bottom {
     bottom: 0;
     position: fixed;
-    margin-left: auto;
-    margin-right: auto;
-    left: 37%;
-    right: 37%;
+    width: 100%;
+    text-align: center;
+    background-color: #272838;
+    color: white;
+    font-size: 14px;
 }
