@@ -12,12 +12,30 @@ h1 {
 }
 
 #go {
-    display: none;
+    display: inline-block;
+    margin: auto;
+    margin-top: 10px;
+    width: 120px;
+    height: 30px;
+    background-color: #272838;
+    border: 2px solid #347FC4;
+    color: #989FCE;
+}
+
+#go:hover {
+    background-color: #292b3d;
+    box-shadow: 2px 2px 5px black;
 }
 
 h3 {
     text-align: center;
     color: #989FCE;
+}
+
+#noresult, #nofranchise {
+    color: rgb(243, 61, 61);
+    width: 100%;
+    text-align: center;
 }
 
 #f1, #f2 {

@@ -9,7 +9,7 @@
 
     <body>
         <div id="header">
-            <h1>Franchise Comparator</h1>
+            <h1>Movie Franchise Comparator</h1>
             <input type="text" id="f1" autofocus="true" placeholder="first franchise"> 
             <input type="text" id="f2" placeholder="second franchise"> 
             <button id="go">Go</button>
@@ -20,6 +20,8 @@
         </h3>
         
         <hr>
+        <p id="noresult" hidden="true">No overlapping actors!</p>
+        <p id="nofranchise" hidden="true"></p>
         <div id="results">
 
         </div>
@@ -28,6 +30,6 @@
             This product uses the TMDb API but is not endorsed or certified by TMDb
         </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="comparator.js"></script>
+        <script src="testing.js"></script>
     </body>
 </html>

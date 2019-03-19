@@ -11,7 +11,8 @@ $('#f1, #f2').keypress((e) => {
 
 $('#go').click(function search() {
     var query1 = $('#f1').val();
-    var query2 = $('#f2').val();
+    var query2 = $('#f2').val();        
+    $('#results').empty();
 
     $('#s1, #s2').find('option').remove();
     getCollectionIDs(query1, query2);
@@ -25,6 +26,11 @@ function getCollectionIDs(query1, query2) {
             query: query1+' collection'
         },
         success: function(xhr) {
+            if(xhr.results.length == 0) {
+                $('#nofranchise').html(`No result for '${query1}'`).show();
+            } else {
+                $('#nofranchise').hide();
+            }
             var id1 = xhr.results[0].id;
             
             for(i in xhr.results) {
@@ -38,6 +44,11 @@ function getCollectionIDs(query1, query2) {
                     query: query2+' collection'
                 },
                 success: function(xhr) {
+                    if(xhr.results.length == 0) {
+                        $('#nofranchise').html(`No result for '${query2}'`).show();
+                    } else {
+                        $('#nofranchise').hide();
+                    }
                     var id2 = xhr.results[0].id;
 
                     for(j in xhr.results) {
@@ -142,7 +153,7 @@ function compareCasts(entries, actors) {
                             img = actors[0][i][k].img,
                             role1 = {title: entries[0][i], role: actors[0][i][k].role},
                             role2 = {title: entries[1][j], role: actors[1][j][l].role};
-                                                
+                        
                         if(commonActors.has(name)) {
                             if(!commonActors.get(name).some(({title}) => title == role1.title)) {
                                 commonActors.get(name).push(role1);
@@ -159,10 +170,12 @@ function compareCasts(entries, actors) {
             }
         }
     }
-    
-    if(commonActors.length == 0) {
-        console.log('No matching actors found!');
+
+
+    if(commonActors.size == 0) {
+        $('#noresult').show();
     } else {
+        $('#noresult').hide();
         printCommonActors(commonActors);
     }
 }
@@ -186,5 +199,6 @@ function printCommonActors(actors) {
 }
 
 $('#s1, #s2').change(() => {
+    $('#results').empty();
     getMovieIDs($('#s1').val(), $('#s2').val());
 })
