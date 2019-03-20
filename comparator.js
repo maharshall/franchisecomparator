@@ -150,7 +150,7 @@ function compareCasts(entries, actors) {
                 for(l in actors[1][j]) {
                     if(actors[0][i][k].name === actors[1][j][l].name) {
                         var name = actors[0][i][k].name,
-                            img = actors[0][i][k].img,
+                            img = actors[0][i][k].img != null ? actors[0][i][k].img : '/bA6lE0fU7Dza4BkNkmze4rFVqbg.jpg',
                             role1 = {title: entries[0][i], role: actors[0][i][k].role},
                             role2 = {title: entries[1][j], role: actors[1][j][l].role};
                         
@@ -187,6 +187,8 @@ function printCommonActors(actors) {
         
         if(value[0]) {
             txt = txt.concat(`<img class="prof" src="https://image.tmdb.org/t/p/original${value[0]}">`);
+        } else {
+            txt = txt.concat(`<img class="prof" src="https://www.palmkvistmaleri.se/wp-content/uploads/2018/02/default.jpg">`);
         }
         txt = txt.concat(`</div> <p class="name">${key}</p><br>`);
         for(var i = 1; i < value.length; i++) {
