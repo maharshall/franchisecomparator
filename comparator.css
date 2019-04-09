@@ -11,6 +11,10 @@ h1 {
     text-align: center;
 }
 
+#selection {
+    color: #989FCE;
+}
+
 #go {
     display: inline-block;
     margin: auto;

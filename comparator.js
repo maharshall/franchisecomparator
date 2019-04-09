@@ -9,16 +9,37 @@ $('#f1, #f2').keypress((e) => {
     }
 })
 
+$('#s1, #s2').change(() => {
+    $('#results').empty();
+    getMovieIDs($('#s1').val(), $('#s2').val());
+})
+
+$('#r1, #r2').change(() => {
+    if($('#r1').prop('checked')) {
+        $('#f1').attr('placeholder', 'first movie');
+        $('#f2').attr('placeholder', 'second movie');
+    }
+
+    if($('#r2').prop('checked')) {
+        $('#f1').attr('placeholder', 'first franchise');
+        $('#f2').attr('placeholder', 'second franchise');
+    }
+})
+
 $('#go').click(function search() {
     var query1 = $('#f1').val();
     var query2 = $('#f2').val();        
     $('#results').empty();
 
     $('#s1, #s2').find('option').remove();
-    getCollectionIDs(query1, query2);
+    if($('#r2').prop('checked')) {
+        getCollections(query1, query2);
+    } else {
+        getMovies(query1, query2);
+    }
 })
 
-function getCollectionIDs(query1, query2) {
+function getCollections(query1, query2) {
     $.ajax({
         url: 'https://api.themoviedb.org/3/search/collection',
         data: {
@@ -62,6 +83,52 @@ function getCollectionIDs(query1, query2) {
     })
 }
 
+function getMovies(query1, query2) {
+    $.ajax({
+        url: 'https://api.themoviedb.org/3/search/movie',
+        data: {
+            api_key: key,
+            query: query1
+        },
+        success: function(xhr) {
+            if(xhr.results.length == 0) {
+                $('#nofranchise').html(`No result for '${query1}'`).show();
+            } else {
+                $('#nofranchise').hide();
+            }
+            var id1 = xhr.results[0].id;
+            var title1 = xhr.results[0].title;
+            
+            for(i in xhr.results) {
+                $('#s1').append(`<option value="${xhr.results[i].id}">${title1}</option>`);
+            }
+
+            $.ajax({
+                url: 'https://api.themoviedb.org/3/search/movie',
+                data: {
+                    api_key: key,
+                    query: query2
+                },
+                success: function(xhr) {
+                    if(xhr.results.length == 0) {
+                        $('#nofranchise').html(`No result for '${query2}'`).show();
+                    } else {
+                        $('#nofranchise').hide();
+                    }
+                    var id2 = xhr.results[0].id;
+                    var title2 = xhr.results[0].title;
+
+                    for(j in xhr.results) {
+                        $('#s2').append(`<option value="${xhr.results[j].id}">${title2}</option>`);
+                    }
+                    getCast(id1, id2, title1, title2);
+                    $('h3').show();
+                }
+            })
+        }
+    })
+}
+
 function getMovieIDs(collection1, collection2) {
     var c1_ids = [],
         c2_ids = [];
@@ -91,14 +158,14 @@ function getMovieIDs(collection1, collection2) {
                         });
                     }
                     
-                    getCast(c1_ids, c2_ids);
+                    getCollectionCast(c1_ids, c2_ids);
                 }
             })
         }
     })
 }
 
-function getCast(c1_ids, c2_ids) {
+function getCollectionCast(c1_ids, c2_ids) {
     var entries = [[], []],
         promises = [[], []];
 
@@ -113,8 +180,45 @@ function getCast(c1_ids, c2_ids) {
     }
 
     Promise.all(promises.map(Promise.all.bind(Promise))).then(result => {
-        compareCasts(entries, result);
+        compareCollectionCasts(entries, result);
     })    
+}
+
+function getCast(id1, id2, title1, title2) {
+    var cast1 = [], cast2 = [];
+    $.ajax({
+        url: 'https://api.themoviedb.org/3/movie/'+id1+'/credits',
+        data: {
+            api_key: key
+        },
+        success: function(xhr) {
+            for(i in xhr.cast) {
+                cast1.push({
+                    name: xhr.cast[i].name,
+                    role: xhr.cast[i].character,
+                    img: xhr.cast[i].profile_path
+                });
+            }
+
+            $.ajax({
+                url: 'https://api.themoviedb.org/3/movie/'+id2+'/credits',
+                data: {
+                    api_key: key
+                },
+                success: function(xhr) {
+                    for(j in xhr.cast) {
+                        cast2.push({
+                            name: xhr.cast[j].name,
+                            role: xhr.cast[j].character,
+                            img: xhr.cast[j].profile_path
+                        });
+                    }
+
+                    compareMovieCasts(cast1, cast2, title1, title2);
+                }
+            })
+        }
+    })
 }
 
 function getCastAjax(id) {
@@ -141,7 +245,7 @@ function getCastAjax(id) {
     })
 }
 
-function compareCasts(entries, actors) {
+function compareCollectionCasts(entries, actors) {
     var commonActors = new Map();
 
     for(i in actors[0]) {
@@ -152,7 +256,7 @@ function compareCasts(entries, actors) {
                         var name = actors[0][i][k].name,
                             img = actors[0][i][k].img != null ? actors[0][i][k].img : '/bA6lE0fU7Dza4BkNkmze4rFVqbg.jpg',
                             role1 = {title: entries[0][i], role: actors[0][i][k].role},
-                            role2 = {title: entries[1][j], role: actors[1][j][l].role};
+                            role2 = {title: entries[1][j], role: actors[1][j][l].role}; 
                         
                         if(commonActors.has(name)) {
                             if(!commonActors.get(name).some(({title}) => title == role1.title)) {
@@ -166,6 +270,41 @@ function compareCasts(entries, actors) {
                             commonActors.set(name, [img, role1, role2]);
                         }
                     }
+                }
+            }
+        }
+    }
+
+
+    if(commonActors.size == 0) {
+        $('#noresult').show();
+    } else {
+        $('#noresult').hide();
+        printCommonActors(commonActors);
+    }
+}
+
+function compareMovieCasts(cast1, cast2, title1, title2) {
+    var commonActors = new Map();
+
+    for(i in cast1) {
+        for(j in cast2) {
+            if(cast1[i].name === cast2[j].name) {
+                var name = cast1[i].name,
+                    img = cast1[i].img != null ? cast1[i].img : '/bA6lE0fU7Dza4BkNkmze4rFVqbg.jpg',
+                    role1 = {title: title1, role: cast1[i].role},
+                    role2 = {title: title2, role: cast2[j].role}; 
+                
+                if(commonActors.has(name)) {
+                    if(!commonActors.get(name).some(({title}) => title == role1.title)) {
+                        commonActors.get(name).push(role1);
+                    }
+                    
+                    if(!commonActors.get(name).some(({title}) => title == role2.title)) {
+                        commonActors.get(name).push(role2);
+                    }
+                } else {
+                    commonActors.set(name, [img, role1, role2]);
                 }
             }
         }
@@ -199,8 +338,3 @@ function printCommonActors(actors) {
 
     $('#results').html(txt);
 }
-
-$('#s1, #s2').change(() => {
-    $('#results').empty();
-    getMovieIDs($('#s1').val(), $('#s2').val());
-})

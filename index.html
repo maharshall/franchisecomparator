@@ -10,6 +10,11 @@
     <body>
         <div id="header">
             <h1>Movie Franchise Comparator</h1>
+            <form id="selection">
+                Compare: 
+                <input type="radio" name="option" id="r1" value="movie"> individual movies
+                <input type="radio" name="option" id="r2" value="franchise" checked> movie franchises
+            </form>
             <input type="text" id="f1" autofocus="true" placeholder="first franchise"> 
             <input type="text" id="f2" placeholder="second franchise"> 
             <button id="go">Go</button>
