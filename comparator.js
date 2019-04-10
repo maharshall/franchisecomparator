@@ -11,10 +11,18 @@ $('#f1, #f2').keypress((e) => {
 
 $('#s1, #s2').change(() => {
     $('#results').empty();
-    getMovieIDs($('#s1').val(), $('#s2').val());
+    if($('#r1').prop('checked')) {
+        getCast($('#s1').val(), $('#s2').val(), $('#s1 option:selected').text(), $('#s2 option:selected').text());
+    }
+    
+    if($('#r2').prop('checked')) {
+        getMovieIDs($('#s1').val(), $('#s2').val());
+    }
 })
 
 $('#r1, #r2').change(() => {
+    $('#results').empty();
+    $('#s1, #s2, #f1, #f2').empty();
     if($('#r1').prop('checked')) {
         $('#f1').attr('placeholder', 'first movie');
         $('#f2').attr('placeholder', 'second movie');
@@ -100,7 +108,7 @@ function getMovies(query1, query2) {
             var title1 = xhr.results[0].title;
             
             for(i in xhr.results) {
-                $('#s1').append(`<option value="${xhr.results[i].id}">${title1}</option>`);
+                $('#s1').append(`<option value="${xhr.results[i].id}">${xhr.results[i].title}</option>`);
             }
 
             $.ajax({
@@ -119,7 +127,7 @@ function getMovies(query1, query2) {
                     var title2 = xhr.results[0].title;
 
                     for(j in xhr.results) {
-                        $('#s2').append(`<option value="${xhr.results[j].id}">${title2}</option>`);
+                        $('#s2').append(`<option value="${xhr.results[j].id}">${xhr.results[j].title}</option>`);
                     }
                     getCast(id1, id2, title1, title2);
                     $('h3').show();

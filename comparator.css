@@ -36,6 +36,10 @@ h3 {
     color: #989FCE;
 }
 
+label {
+    cursor: pointer;
+}
+
 #noresult, #nofranchise {
     color: rgb(243, 61, 61);
     width: 100%;
